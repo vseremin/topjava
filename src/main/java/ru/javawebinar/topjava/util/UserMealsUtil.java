@@ -8,7 +8,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.groupingBy;
 
 public class UserMealsUtil {
     public static void main(String[] args) {
@@ -22,22 +25,23 @@ public class UserMealsUtil {
                 new UserMeal(LocalDateTime.of(2020, Month.JANUARY, 31, 20, 0), "Ужин", 410)
         );
 
-        List<UserMealWithExcess> mealsTo = filteredByCycles(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2005);
+        List<UserMealWithExcess> mealsTo = filteredByCycles(meals, LocalTime.of(7, 0), LocalTime.of(15, 0), 2005);
         mealsTo.forEach(System.out::println);
 
-        System.out.println(filteredByStreams(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2005));
+        System.out.println(filteredByStreams(meals, LocalTime.of(7, 0), LocalTime.of(15, 0), 2005));
     }
 
     public static List<UserMealWithExcess> filteredByCycles(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
         Map<LocalDate, Integer> caloriesPerDate = new HashMap<>();
-        Map<LocalDate, BooleanContainer> localDateBooleanMap = new HashMap<>();
+        Map<LocalDate, AtomicBoolean> localDateBooleanMap = new HashMap<>();
         List<UserMealWithExcess> userMealWithExcesses = new ArrayList<>();
 
         meals.forEach(meal -> {
             LocalDate date = meal.getDateTime().toLocalDate();
             caloriesPerDate.merge(date, meal.getCalories(), Integer::sum);
-            localDateBooleanMap.merge(date, new BooleanContainer(caloriesPerDate.get(date) < caloriesPerDay),
-                    (a, b) -> a.getExcess(caloriesPerDate.get(date) < caloriesPerDay));
+            AtomicBoolean excess = localDateBooleanMap.getOrDefault(date, new AtomicBoolean(caloriesPerDate.get(date) > caloriesPerDay));
+            excess.set(caloriesPerDate.get(date) > caloriesPerDay);
+            localDateBooleanMap.put(date, excess);
 
             if (TimeUtil.isBetweenHalfOpen(meal.getDateTime().toLocalTime(), startTime, endTime)) {
                 userMealWithExcesses.add(new UserMealWithExcess(meal.getDateTime(), meal.getDescription(), meal.getCalories(),
@@ -48,19 +52,16 @@ public class UserMealsUtil {
     }
 
     public static List<UserMealWithExcess> filteredByStreams(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
-        Map<LocalDate, Integer> caloriesPerDate = new HashMap<>();
-        Map<LocalDate, BooleanContainer> localDateBooleanMap = new HashMap<>();
-
-        return meals.stream().map(meal -> {
-            LocalDate date = meal.getDateTime().toLocalDate();
-            caloriesPerDate.merge(date, meal.getCalories(), Integer::sum);
-            localDateBooleanMap.merge(date, new BooleanContainer(caloriesPerDate.get(date) < caloriesPerDay),
-                    (a, b) -> a.getExcess(caloriesPerDate.get(date) < caloriesPerDay));
-            if (TimeUtil.isBetweenHalfOpen(meal.getDateTime().toLocalTime(), startTime, endTime)) {
-                return new UserMealWithExcess(meal.getDateTime(), meal.getDescription(), meal.getCalories(),
-                        localDateBooleanMap.get(date));
-            }
-            return null;
-        }).filter(meal -> meal != null).collect(Collectors.toList());
+        return meals.stream()
+                .collect(groupingBy(meal -> meal.getDateTime().toLocalDate()))
+                .values().stream()
+                .map(userMeals -> {
+                    AtomicBoolean excess = new AtomicBoolean(userMeals.stream().mapToInt(UserMeal::getCalories).sum() > caloriesPerDay);
+                    return userMeals.stream()
+                            .filter(meal -> TimeUtil.isBetweenHalfOpen(meal.getDateTime().toLocalTime(), startTime, endTime))
+                            .map(meal -> new UserMealWithExcess(meal.getDateTime(), meal.getDescription(), meal.getCalories(), excess)).collect(Collectors.toList());
+                }).flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
 }
+
