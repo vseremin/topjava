@@ -40,7 +40,7 @@ public class UserMealsUtil {
             LocalDate date = meal.getDateTime().toLocalDate();
             caloriesPerDate.merge(date, meal.getCalories(), Integer::sum);
             AtomicBoolean excess = excessByDays.computeIfAbsent(date, day -> new AtomicBoolean());
-                    excess.set(caloriesPerDate.get(date) > caloriesPerDay);
+            excess.set(caloriesPerDate.get(date) > caloriesPerDay);
 
             if (TimeUtil.isBetweenHalfOpen(meal.getDateTime().toLocalTime(), startTime, endTime)) {
                 userMealWithExcesses.add(new UserMealWithExcess(meal.getDateTime(), meal.getDescription(), meal.getCalories(),
