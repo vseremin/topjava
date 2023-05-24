@@ -39,12 +39,12 @@ public class UserMealsUtil {
         meals.forEach(meal -> {
             LocalDate date = meal.getDateTime().toLocalDate();
             caloriesPerDate.merge(date, meal.getCalories(), Integer::sum);
-            excessByDays.computeIfAbsent(date, excess -> new AtomicBoolean())
-                    .set(caloriesPerDate.get(date) > caloriesPerDay);
+            AtomicBoolean excess = excessByDays.computeIfAbsent(date, day -> new AtomicBoolean());
+                    excess.set(caloriesPerDate.get(date) > caloriesPerDay);
 
             if (TimeUtil.isBetweenHalfOpen(meal.getDateTime().toLocalTime(), startTime, endTime)) {
                 userMealWithExcesses.add(new UserMealWithExcess(meal.getDateTime(), meal.getDescription(), meal.getCalories(),
-                        excessByDays.get(meal.getDateTime().toLocalDate())));
+                        excess));
             }
         });
         return userMealWithExcesses;
