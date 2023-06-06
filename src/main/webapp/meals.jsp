@@ -27,8 +27,8 @@
                 <td>${f:formatLocalDateTime(meal.dateTime)}</td>
                 <td>${meal.description}</td>
                 <td>${meal.calories}</td>
-                <td><a href="meals?action=edit&id=${meal.id}"></a>Update</td>
-                <td><a href="meals?action=delete&id=${meal.id}"></a>Delete</td>
+                <td><a href="meals?action=edit&id=${meal.id}"/>Update</td>
+                <td><a href="meals?action=delete&id=${meal.id}"/>Delete</td>
             </tr>
         </c:forEach>
         </tbody>

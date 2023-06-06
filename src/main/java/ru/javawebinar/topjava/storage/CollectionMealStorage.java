@@ -37,7 +37,8 @@ public class CollectionMealStorage implements MealStorage {
     @Override
     public Meal create(Meal meal) {
         meal.setId(generatedId());
-        return storage.put(meal.getId(), meal);
+        storage.put(meal.getId(), meal);
+        return meal;
     }
 
     @Override
