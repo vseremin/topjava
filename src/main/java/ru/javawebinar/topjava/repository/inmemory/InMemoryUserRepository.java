@@ -3,8 +3,10 @@ package ru.javawebinar.topjava.repository.inmemory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
+import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -16,8 +18,13 @@ import java.util.stream.Collectors;
 @Repository
 public class InMemoryUserRepository implements UserRepository {
     private static final Logger log = LoggerFactory.getLogger(InMemoryUserRepository.class);
-    protected static final Map<Integer, User> userRepository = new ConcurrentHashMap<>();
+    private final Map<Integer, User> userRepository = new ConcurrentHashMap<>();
     private final AtomicInteger id = new AtomicInteger();
+
+    {
+        save(new User(1, "userName", "email@mail.ru", "password", Role.USER));
+        save(new User(2, "adminName", "email@mail.ru", "password", Role.ADMIN));
+    }
 
     @Override
     public boolean delete(int id) {
@@ -35,7 +42,6 @@ public class InMemoryUserRepository implements UserRepository {
             user.setId(id.incrementAndGet());
             log.info("save {}", user);
             userRepository.put(user.getId(), user);
-            InMemoryMealRepository.mealRepository.put(user.getId(), new ConcurrentHashMap<>());
             return user;
         }
         log.info("update {}", user);

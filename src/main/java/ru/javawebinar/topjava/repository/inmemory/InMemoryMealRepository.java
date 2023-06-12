@@ -2,36 +2,34 @@ package ru.javawebinar.topjava.repository.inmemory;
 
 import org.springframework.stereotype.Repository;
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.model.Role;
-import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.MealRepository;
-import ru.javawebinar.topjava.util.DateTimeUtil;
 import ru.javawebinar.topjava.util.MealsUtil;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.Collection;
+
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.Collections;
-import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Repository
 public class InMemoryMealRepository implements MealRepository {
-    protected static final Map<Integer, Map<Integer, Meal>> mealRepository = new ConcurrentHashMap<>();
+    private final Map<Integer, Map<Integer, Meal>> mealRepository = new ConcurrentHashMap<>();
     private final AtomicInteger counter = new AtomicInteger(0);
 
     {
-        InMemoryUserRepository.userRepository.put(1, new User(1, "userName", "email@mail.ru", "password", Role.USER));
-        InMemoryUserRepository.userRepository.put(2, new User(2, "adminName", "email@mail.ru", "password", Role.ADMIN));
-        mealRepository.put(1, new ConcurrentHashMap<>());
-        mealRepository.put(2, new ConcurrentHashMap<>());
         MealsUtil.meals.forEach(meal -> save(meal, 1));
+        save(new Meal(LocalDateTime.of(2023, Month.JANUARY, 30, 10, 0), "Еда пользователя 2", 5000), 2);
     }
 
     @Override
-    public Meal save(Meal meal, Integer userId) {
+    public Meal save(Meal meal, int userId) {
+        if (!mealRepository.containsKey(userId)) {
+            mealRepository.put(userId, new ConcurrentHashMap<>());
+        }
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
             mealRepository.get(userId).put(meal.getId(), meal);
@@ -43,37 +41,24 @@ public class InMemoryMealRepository implements MealRepository {
 
     @Override
     public boolean delete(int id, int userId) {
-        if (get(id, userId) != null) {
-            return mealRepository.get(userId).remove(id) != null;
-        }
-        return false;
+        return mealRepository.get(userId).remove(id) != null;
     }
 
     @Override
     public Meal get(int id, int userId) {
-        if (mealRepository.containsKey(userId)) {
-            if (mealRepository.get(userId).containsKey(id)) {
-                return mealRepository.get(userId).get(id);
-            }
+        Map<Integer, Meal> meals = mealRepository.get(userId);
+        if (meals != null) {
+            return mealRepository.get(userId).get(id);
         }
         return null;
     }
 
     @Override
-    public Collection<Meal> getAll(int userId) {
-        return mealRepository.get(userId) == null ? Collections.emptyList() :
-                mealRepository.get(userId).values().stream()
-                        .sorted(Comparator.comparing(Meal::getDateTime).reversed())
-                        .collect(Collectors.toList());
-    }
-
-    @Override
-    public Collection<Meal> getAll(int userId, LocalDate startDate, LocalTime startTime, LocalDate endDate, LocalTime endTime) {
-        return mealRepository.get(userId) == null ? Collections.emptyList() :
-                mealRepository.get(userId).values().stream()
-                        .filter(meal -> DateTimeUtil.isBetweenHalfOpen(meal.getDate(), startDate, endDate.plusDays(1)) &&
-                                DateTimeUtil.isBetweenHalfOpen(meal.getTime(), startTime, endTime))
-                        .collect(Collectors.toList());
+    public List<Meal> getAll(int userId, Predicate<Meal> predicate) {
+        Map<Integer, Meal> meals = mealRepository.get(userId);
+        return meals == null ? Collections.emptyList() : meals.values().stream()
+                .filter(predicate)
+                .collect(Collectors.toList());
     }
 }
 

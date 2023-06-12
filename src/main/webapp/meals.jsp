@@ -1,9 +1,7 @@
-<%@ page import="java.time.LocalDate" %>
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://topjava.javawebinar.ru/functions" %>
-<%--<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>--%>
 <html>
 <head>
     <title>Meal list</title>
@@ -25,10 +23,10 @@
     <a href="meals?action=create">Add Meal</a>
     <br><br>
     <form action="meals">
-        <dd>От даты: <input type="date" value="${param.startDate}" name="startDate" required>
-            От времени: <input type="time" value="${param.startTime}" name="startTime" required></dd>
-        <dd>До даты: <input type="date" value="${param.endDate}" name="endDate" required>
-            До времени: <input type="time" value="${param.endTime}" name="endTime" required></dd>
+        <dd>От даты: <input type="date" value="${param.startDate}" name="startDate">
+            От времени: <input type="time" value="${param.startTime}" name="startTime"></dd>
+        <dd>До даты: <input type="date" value="${param.endDate}" name="endDate">
+            До времени: <input type="time" value="${param.endTime}" name="endTime"></dd>
         <br>
         <p><input type="submit" value="Отправить"></p>
     </form>
