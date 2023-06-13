@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Repository
@@ -29,9 +30,10 @@ public class InMemoryMealRepository implements MealRepository {
 
     @Override
     public Meal save(Meal meal, int userId) {
+        Map<Integer, Meal> meals = mealRepository.computeIfAbsent(userId, k -> new ConcurrentHashMap<>());
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
-            mealRepository.computeIfAbsent(userId, k -> new ConcurrentHashMap<>()).put(meal.getId(), meal);
+            meals.putIfAbsent(meal.getId(), meal);
             return meal;
         }
         // handle case: update, but not present in storage
@@ -41,34 +43,29 @@ public class InMemoryMealRepository implements MealRepository {
     @Override
     public boolean delete(int id, int userId) {
         Map<Integer, Meal> meals = mealRepository.get(userId);
-        if (meals != null) {
-            return meals.remove(id) != null;
-        }
-        return false;
+        return meals != null && meals.remove(id) != null;
     }
 
     @Override
     public Meal get(int id, int userId) {
         Map<Integer, Meal> meals = mealRepository.get(userId);
-        if (meals != null) {
-            return meals.get(id);
-        }
-        return null;
+        return meals != null ? meals.get(id) : null;
     }
 
     @Override
     public List<Meal> getAll(int userId) {
-        Map<Integer, Meal> meals = mealRepository.get(userId);
-        return meals == null ? Collections.emptyList() : meals.values().stream()
-                .sorted(Comparator.comparing(Meal::getDateTime).reversed())
-                .collect(Collectors.toList());
+        return filterByStrategy(userId, meal -> true);
     }
 
     @Override
-    public List<Meal> getMealsFiltered(int userId, LocalDate startDate, LocalDate endDate) {
+    public List<Meal> getFiltered(int userId, LocalDate startDate, LocalDate endDate) {
+        return filterByStrategy(userId, meal -> DateTimeUtil.isBetweenHalfOpen(meal.getDate(), startDate, endDate));
+    }
+
+    private List<Meal> filterByStrategy(int userId, Predicate<Meal> predicate) {
         Map<Integer, Meal> meals = mealRepository.get(userId);
         return meals == null ? Collections.emptyList() : meals.values().stream()
-                .filter(meal -> DateTimeUtil.isBetweenHalfOpen(meal.getDate(), startDate, endDate))
+                .filter(predicate)
                 .sorted(Comparator.comparing(Meal::getDateTime).reversed())
                 .collect(Collectors.toList());
     }
