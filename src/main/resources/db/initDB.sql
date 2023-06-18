@@ -31,10 +31,11 @@ CREATE SEQUENCE meal_seq START WITH 100000;
 CREATE TABLE meals
 (
     id              INTEGER PRIMARY KEY DEFAULT nextval('meal_seq'),
-    user_id         INTEGER REFERENCES users(id)    NOT NULL,
-    description     VARCHAR                         NOT NULL,
-    calories        INTEGER                         NOT NULL,
-    date_time       TIMESTAMP                       NOT NULL
+    user_id         INTEGER     NOT NULL,
+    description     VARCHAR     NOT NULL,
+    calories        INTEGER     NOT NULL,
+    date_time       TIMESTAMP   NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
 CREATE UNIQUE INDEX users_unique_data_meal_idx ON meals(user_id, date_time);
