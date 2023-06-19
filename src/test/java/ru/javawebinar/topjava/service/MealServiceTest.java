@@ -120,7 +120,8 @@ public class MealServiceTest {
 
     @Test
     public void createDateNull() {
-        assertThrows(DataIntegrityViolationException.class, () -> createWithDate(null));
+        assertThrows(DataIntegrityViolationException.class,
+                () -> mealService.create(new Meal(null, "Null", 100), USER_ID));
     }
 
     @Test
@@ -130,7 +131,7 @@ public class MealServiceTest {
         assertThrows(DataIntegrityViolationException.class, () -> mealService.update(updated, USER_ID));
     }
 
-    private void createWithDate(LocalDateTime ldt) throws DataIntegrityViolationException {
+    private void createWithDate(LocalDateTime ldt) {
         Meal created = mealService.create(getNew(ldt), USER_ID);
         Integer newId = created.getId();
         Meal newMeal = getNew(ldt);
