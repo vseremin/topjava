@@ -1,8 +1,12 @@
 package ru.javawebinar.topjava.service;
 
-import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
+import org.junit.runners.model.Statement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.ContextConfiguration;
@@ -26,8 +30,20 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 })
 @RunWith(SpringRunner.class)
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
-@Ignore
 public class MealServiceTest {
+
+    private final Logger log = LoggerFactory.getLogger(MealServiceTest.class);
+    @Rule
+    public final TestRule test = (statement, description) -> new Statement() {
+        @Override
+        public void evaluate() throws Throwable {
+            log.info(description.getClassName() + " \n");
+            Long startTime = System.currentTimeMillis();
+            statement.evaluate();
+            Long endTime = System.currentTimeMillis();
+            log.info("\n" + description.getClassName() + ". Test execution time = " + (endTime - startTime) + " ms");
+        }
+    };
 
     @Autowired
     private MealService service;
@@ -54,6 +70,7 @@ public class MealServiceTest {
         int newId = created.id();
         Meal newMeal = getNew();
         newMeal.setId(newId);
+        newMeal.setUser(created.getUser());
         MEAL_MATCHER.assertMatch(created, newMeal);
         MEAL_MATCHER.assertMatch(service.get(newId, USER_ID), newMeal);
     }
