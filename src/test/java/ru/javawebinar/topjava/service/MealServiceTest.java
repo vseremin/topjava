@@ -19,6 +19,7 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertThrows;
 import static ru.javawebinar.topjava.MealTestData.*;
@@ -34,20 +35,18 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 public class MealServiceTest {
 
     private static final Logger log = LoggerFactory.getLogger(MealServiceTest.class);
-    private static StringBuilder sb = new StringBuilder("\n|-----------------------------------|\n" +
-            "|Method name              | Time, ms|\n|-----------------------------------|\n");
+    private static StringBuilder timeMethodInfo = new StringBuilder("\n|-----------------------------------|\n" +
+            "|Method name               |Time, ms|\n|-----------------------------------|\n");
 
     @Rule
     public Stopwatch stopwatch = new Stopwatch() {
         @Override
-        protected void succeeded(long nanos, Description description) {
+        protected void finished(long nanos, Description description) {
             String methodName = description.getMethodName();
-            String timeValue = String.format("%.2f", (nanos * 0.000001));
-            log.info(methodName + ". Time = {} ms", timeValue);
-            sb.append("|" + methodName + String.format("%" + (25 - methodName.length()) + "s", " ") + "|"
-                    + String.format("%" + (9 - timeValue.length()) + "s", " ") + timeValue + "|" +
-                    "\n|-----------------------------------|\n");
-
+            String timeValue = String.format("%d", TimeUnit.NANOSECONDS.toMillis(nanos));
+            log.info("{}. Time = {} ms", methodName, timeValue);
+            timeMethodInfo.append(
+                    String.format("|%-25s | %7s|\n|-----------------------------------|\n", methodName,  timeValue));
         }
     };
 
@@ -135,6 +134,6 @@ public class MealServiceTest {
 
     @AfterClass
     public static void printAllLog() {
-        log.info(sb.toString());
+        log.info(timeMethodInfo.toString());
     }
 }

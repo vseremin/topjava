@@ -12,17 +12,16 @@ import java.time.LocalTime;
 
 @NamedQueries({
         @NamedQuery(name = Meal.DELETE, query = "DELETE FROM Meal m WHERE m.id=?1 and m.user.id=?2"),
-        @NamedQuery(name = Meal.GET_BY_ID, query = "SELECT m FROM Meal m WHERE m.id=?1 and m.user.id=?2"),
         @NamedQuery(name = Meal.GET_ALL, query = "SELECT m FROM Meal m WHERE m.user.id=?1 ORDER BY m.dateTime DESC"),
         @NamedQuery(name = Meal.GET_ALL_FILTERED, query =
                 "SELECT m FROM Meal m WHERE m.user.id=?1 AND (m.dateTime >= ?2 AND m.dateTime < ?3) ORDER BY m.dateTime DESC"),
 })
 @Entity
-@Table(name = "meal")
+@Table(name = "meal",
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", "date_time"}, name = "meal_unique_user_datetime_idx")})
 public class Meal extends AbstractBaseEntity {
 
     public static final String DELETE = "Meal.delete";
-    public static final String GET_BY_ID = "Meal.get";
     public static final String GET_ALL = "Meal.getAll";
     public static final String GET_ALL_FILTERED = "Meal.getBetweenHalfOpen";
 
@@ -40,7 +39,7 @@ public class Meal extends AbstractBaseEntity {
     private int calories;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     @NotNull
     private User user;
 
