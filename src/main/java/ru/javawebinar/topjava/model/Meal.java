@@ -12,7 +12,7 @@ import java.time.LocalTime;
 
 @NamedQueries({
         @NamedQuery(name = Meal.DELETE, query = "DELETE FROM Meal m WHERE m.id=?1 and m.user.id=?2"),
-        @NamedQuery(name = Meal.GET_BY_ID, query = "SELECT m FROM Meal m LEFT JOIN FETCH m.user WHERE m.id=?1 and m.user=?2"),
+        @NamedQuery(name = Meal.GET_BY_ID, query = "SELECT m FROM Meal m WHERE m.id=?1 and m.user.id=?2"),
         @NamedQuery(name = Meal.GET_ALL, query = "SELECT m FROM Meal m WHERE m.user.id=?1 ORDER BY m.dateTime DESC"),
         @NamedQuery(name = Meal.GET_ALL_FILTERED, query =
                 "SELECT m FROM Meal m WHERE m.user.id=?1 AND (m.dateTime >= ?2 AND m.dateTime < ?3) ORDER BY m.dateTime DESC"),
@@ -26,7 +26,7 @@ public class Meal extends AbstractBaseEntity {
     public static final String GET_ALL = "Meal.getAll";
     public static final String GET_ALL_FILTERED = "Meal.getBetweenHalfOpen";
 
-    @Column(name = "date_time", nullable = false, unique = true)
+    @Column(name = "date_time", nullable = false)
     @NotNull
     private LocalDateTime dateTime;
 
@@ -36,12 +36,12 @@ public class Meal extends AbstractBaseEntity {
     private String description;
 
     @Column(name = "calories", nullable = false)
-    @NotNull
-    @Range(max=5000)
+    @Range(max = 5000)
     private int calories;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @NotNull
     private User user;
 
     public Meal() {

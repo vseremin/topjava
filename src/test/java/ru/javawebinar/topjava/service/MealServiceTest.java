@@ -1,10 +1,11 @@
 package ru.javawebinar.topjava.service;
 
+import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TestRule;
+import org.junit.rules.Stopwatch;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
-import org.junit.runners.model.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,16 +33,21 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 public class MealServiceTest {
 
-    private final Logger log = LoggerFactory.getLogger(MealServiceTest.class);
+    private static final Logger log = LoggerFactory.getLogger(MealServiceTest.class);
+    private static StringBuilder sb = new StringBuilder("\n|-----------------------------------|\n" +
+            "|Method name              | Time, ms|\n|-----------------------------------|\n");
+
     @Rule
-    public final TestRule test = (statement, description) -> new Statement() {
+    public Stopwatch stopwatch = new Stopwatch() {
         @Override
-        public void evaluate() throws Throwable {
-            log.info(description.getClassName() + " \n");
-            Long startTime = System.currentTimeMillis();
-            statement.evaluate();
-            Long endTime = System.currentTimeMillis();
-            log.info("\n" + description.getClassName() + ". Test execution time = " + (endTime - startTime) + " ms");
+        protected void succeeded(long nanos, Description description) {
+            String methodName = description.getMethodName();
+            String timeValue = String.format("%.2f", (nanos * 0.000001));
+            log.info(methodName + ". Time = {} ms", timeValue);
+            sb.append("|" + methodName + String.format("%" + (25 - methodName.length()) + "s", " ") + "|"
+                    + String.format("%" + (9 - timeValue.length()) + "s", " ") + timeValue + "|" +
+                    "\n|-----------------------------------|\n");
+
         }
     };
 
@@ -70,7 +76,6 @@ public class MealServiceTest {
         int newId = created.id();
         Meal newMeal = getNew();
         newMeal.setId(newId);
-        newMeal.setUser(created.getUser());
         MEAL_MATCHER.assertMatch(created, newMeal);
         MEAL_MATCHER.assertMatch(service.get(newId, USER_ID), newMeal);
     }
@@ -126,5 +131,10 @@ public class MealServiceTest {
     @Test
     public void getBetweenWithNullDates() {
         MEAL_MATCHER.assertMatch(service.getBetweenInclusive(null, null, USER_ID), meals);
+    }
+
+    @AfterClass
+    public static void printAllLog() {
+        log.info(sb.toString());
     }
 }

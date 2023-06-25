@@ -44,10 +44,9 @@ public class JpaMealRepository implements MealRepository {
 
     @Override
     public Meal get(int id, int userId) {
-        User user = em.getReference(User.class, userId);
         List<Meal> meals = em.createNamedQuery(Meal.GET_BY_ID, Meal.class)
                 .setParameter(1, id)
-                .setParameter(2, user)
+                .setParameter(2, userId)
                 .getResultList();
         return DataAccessUtils.singleResult(meals);
     }
