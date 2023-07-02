@@ -7,37 +7,40 @@ import ru.javawebinar.topjava.repository.MealRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class DataJpaMealRepository implements MealRepository {
 
     private final CrudMealRepository crudRepository;
 
-    public DataJpaMealRepository(CrudMealRepository crudRepository) {
+    private final CrudUserRepository crudUserRepository;
+
+    public DataJpaMealRepository(CrudMealRepository crudRepository, CrudUserRepository crudUserRepository) {
         this.crudRepository = crudRepository;
+        this.crudUserRepository = crudUserRepository;
     }
 
     @Override
     public Meal save(Meal meal, int userId) {
-        User user = crudRepository.findUser(userId);
-        meal.setUser(user);
-        if (meal.isNew()) {
-            crudRepository.save(meal);
-            return meal;
+        User user = crudUserRepository.getReferenceById(userId);
+        if (meal.isNew() || get(meal.id(), userId) != null) {
+            meal.setUser(user);
+            return crudRepository.save(meal);
         }
-        return get(meal.id(), userId) == null ? null : crudRepository.save(meal);
+        return null;
     }
 
     @Override
     public boolean delete(int id, int userId) {
-        Meal meal = get(id, userId);
-        return meal != null && crudRepository.delete(id) != 0;
+        return crudRepository.delete(id, userId) != 0;
     }
 
     @Override
     public Meal get(int id, int userId) {
-        Meal meal = crudRepository.findById(id).orElse(null);
-        return meal != null && meal.getUser().getId() == userId ? meal : null;
+        return crudRepository.findById(id)
+                .filter(m -> m.getUser().getId() == userId)
+                .orElse(null);
     }
 
     @Override
@@ -50,6 +53,7 @@ public class DataJpaMealRepository implements MealRepository {
         return crudRepository.getBetween(userId, startDateTime, endDateTime);
     }
 
+    @Override
     public Meal getWithUser(int id, int userId) {
         return crudRepository.getWithUser(id, userId);
     }
