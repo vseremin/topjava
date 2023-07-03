@@ -43,6 +43,11 @@ public abstract class AbstractServiceTest {
         }
     };
 
+    @BeforeClass
+    public static void clearResult() {
+        results.setLength(0);
+    }
+
     @AfterClass
     public static void printResult() {
         log.info("\n---------------------------------" +
@@ -51,10 +56,4 @@ public abstract class AbstractServiceTest {
                 results +
                 "\n---------------------------------");
     }
-
-    @BeforeClass
-    public static void clearResult() {
-        results.setLength(0);
-    }
-
 }

@@ -23,7 +23,18 @@ public class DataJpaMealServiceTest extends MealServiceTest {
     }
 
     @Test
-    public void getWithUserWithOtherMeal() {
+    public void getWithUserWithNotFoundMeal() {
         assertThrows(NotFoundException.class, () -> service.getWithUser(NOT_FOUND, ADMIN_ID));
+    }
+
+    @Test
+    public void getWithUserWithOtherMeal() {
+        assertThrows(NotFoundException.class, () -> service.getWithUser(MEAL1_ID, ADMIN_ID));
+    }
+
+    @Test
+    public void getWithUserWithoutRole() {
+        Meal meal = service.getWithUser(WITHOUT_ROLE_MEAL_ID, USER_WITHOUT_ROLE_ID);
+        MEAL_MATCHER.assertMatch(meal, mealTest);
     }
 }

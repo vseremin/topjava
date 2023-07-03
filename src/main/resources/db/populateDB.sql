@@ -22,3 +22,10 @@ VALUES ('2020-01-30 10:00:00', 'Завтрак', 500, 100000),
        ('2020-01-31 20:00:00', 'Ужин', 510, 100000),
        ('2020-01-31 14:00:00', 'Админ ланч', 510, 100001),
        ('2020-01-31 21:00:00', 'Админ ужин', 1500, 100001);
+
+
+INSERT INTO users (name, email, password)
+VALUES ('Test', 'test@yandex.ru', 'password');
+
+INSERT INTO meal (date_time, description, calories, user_id)
+VALUES ('2020-01-30 10:00:00', 'Завтрак', 500, 100012);

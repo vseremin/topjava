@@ -15,11 +15,14 @@ public class UserTestData {
     public static final int USER_ID = START_SEQ;
     public static final int ADMIN_ID = START_SEQ + 1;
     public static final int GUEST_ID = START_SEQ + 2;
+    public static final int USER_WITHOUT_ROLE_ID = START_SEQ + 12;
     public static final int NOT_FOUND = 10;
 
     public static final User user = new User(USER_ID, "User", "user@yandex.ru", "password", Role.USER);
     public static final User admin = new User(ADMIN_ID, "Admin", "admin@gmail.com", "admin", Role.ADMIN);
     public static final User guest = new User(GUEST_ID, "Guest", "guest@gmail.com", "guest");
+
+    public static final User userWithoutRole = new User(START_SEQ + 12, "Test", "test@yandex.ru", "password");
 
     public static User getNew() {
         return new User(null, "New", "new@gmail.com", "newPass", 1555, false, new Date(), Collections.singleton(Role.USER));
