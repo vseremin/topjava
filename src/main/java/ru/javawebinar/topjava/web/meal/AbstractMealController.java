@@ -16,16 +16,33 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-@Controller
+import static ru.javawebinar.topjava.util.ValidationUtil.assureIdConsistent;
+import static ru.javawebinar.topjava.util.ValidationUtil.checkNew;
+
+//@Controller
 public abstract class AbstractMealController {
 
-    private static final Logger log = LoggerFactory.getLogger(RootController.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractMealController.class);
 
     @Autowired
     private MealService service;
 
     public AbstractMealController(MealService service) {
         this.service = service;
+    }
+
+    public Meal create(Meal meal) {
+        int userId = SecurityUtil.authUserId();
+        checkNew(meal);
+        log.info("create {} for user {}", meal, userId);
+        return service.create(meal, userId);
+    }
+
+    public void update(Meal meal, int id) {
+        int userId = SecurityUtil.authUserId();
+        assureIdConsistent(meal, id);
+        log.info("update {} for user {}", meal, userId);
+        service.update(meal, userId);
     }
 
     public List<MealTo> getAll() {

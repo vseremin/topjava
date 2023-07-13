@@ -3,7 +3,9 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 
 <html>
+    <jsp:include page="fragments/headTag.jsp"/>
 <head>
+    <jsp:include page="fragments/bodyHeader.jsp"/>
     <title><spring:message code="meal.title"/></title>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -11,10 +13,9 @@
 <section>
     <h3><a href="index.html"><spring:message code="app.home"/></a></h3>
     <hr>
-    <c:choose>
-        <c:when test="${param.action == 'create'}"><h2><spring:message code="meal.createTitle"/></h2></c:when>
-        <c:when test="${param.action == 'update'}"><h2><spring:message code="meal.updateTitle"/></h2></c:when>
-    </c:choose>
+
+    <h2><spring:message code="${!meal.isNew() ? 'meal.updateTitle' : 'meal.createTitle'}"/></h2>
+
     <jsp:useBean id="meal" type="ru.javawebinar.topjava.model.Meal" scope="request"/>
     <form method="post" action="meals">
         <input type="hidden" name="id" value="${meal.id}">
@@ -34,5 +35,6 @@
         <button onclick="window.history.back()" type="button"><spring:message code="meal.cancel"/></button>
     </form>
 </section>
+<jsp:include page="fragments/footer.jsp"/>
 </body>
 </html>

@@ -44,7 +44,7 @@ public class JdbcUserRepository implements UserRepository {
     @Override
     @Transactional
     public User save(User user) {
-        JdbcValidator.valid(user);
+        Validator.validate(user);
 
         BeanPropertySqlParameterSource parameterSource = new BeanPropertySqlParameterSource(user);
 
@@ -93,18 +93,13 @@ public class JdbcUserRepository implements UserRepository {
         Map<Integer, List<Role>> roles = new HashMap<>();
         jdbcTemplate.query("SELECT * FROM user_role", rs -> {
             while (rs.next()) {
-                Role role = Role.valueOf(rs.getString("role"));
                 Integer key = rs.getInt("user_id");
-                roles.computeIfAbsent(key, k -> {
-                    List<Role> r = new ArrayList<>();
-                            r.add(role);
-                    return r;
-                });
-                roles.computeIfPresent(key, (k, v) -> {
-                   if (!v.contains(role))
-                       v.add(role);
-                        return v;
-                });
+                Role role = Role.valueOf(rs.getString("role"));
+
+                roles.computeIfAbsent(key, k -> new ArrayList<>());
+                if (!roles.get(key).contains(role)) {
+                    roles.get(key).add(role);
+                }
             }
             return null;
         });
@@ -118,11 +113,11 @@ public class JdbcUserRepository implements UserRepository {
     private User addRoles(User user) {
         if (user == null) return null;
         List<Role> roles = new ArrayList<>();
-        jdbcTemplate.query("SELECT * FROM user_role WHERE user_id = ?", new Object[]{user.getId()}, rs -> {
+        jdbcTemplate.query("SELECT * FROM user_role WHERE user_id = ?", rs -> {
             do {
                 roles.add(Role.valueOf(rs.getString("role")));
             } while (rs.next());
-        });
+        }, user.getId());
         user.setRoles(roles);
         return user;
     }

@@ -1,11 +1,11 @@
 package ru.javawebinar.topjava.service;
 
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.env.Environment;
 import org.springframework.dao.DataAccessException;
 import ru.javawebinar.topjava.Profiles;
 import ru.javawebinar.topjava.UserTestData;
@@ -23,6 +23,9 @@ import static org.junit.Assert.assertThrows;
 import static ru.javawebinar.topjava.UserTestData.*;
 
 public abstract class AbstractUserServiceTest extends AbstractServiceTest {
+
+    @Autowired
+    protected Environment env;
 
     @Autowired
     protected UserService service;
@@ -74,6 +77,12 @@ public abstract class AbstractUserServiceTest extends AbstractServiceTest {
     public void get() {
         User user = service.get(USER_ID);
         USER_MATCHER.assertMatch(user, UserTestData.user);
+    }
+
+    @Test
+    public void getWithTwoRoles() {
+        User user = service.get(ADMIN_ID);
+        USER_MATCHER.assertMatch(user, UserTestData.admin);
     }
 
     @Test
