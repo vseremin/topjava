@@ -12,8 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
+import ru.javawebinar.topjava.util.ValidationUtil;
 
-import javax.validation.Valid;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -42,7 +42,7 @@ public class JdbcUserRepository implements UserRepository {
     @Override
     @Transactional
     public User save(User user) {
-        ValidatorUtil.validate(user);
+        ValidationUtil.validate(user);
 
         BeanPropertySqlParameterSource parameterSource = new BeanPropertySqlParameterSource(user);
 
@@ -80,7 +80,7 @@ public class JdbcUserRepository implements UserRepository {
     }
 
     @Override
-    public User getByEmail(@Valid String email) {
+    public User getByEmail(String email) {
         List<User> users = jdbcTemplate.query("SELECT * FROM users WHERE email=?", ROW_MAPPER, email);
         return addRoles(DataAccessUtils.singleResult(users));
     }
@@ -93,28 +93,19 @@ public class JdbcUserRepository implements UserRepository {
                 Integer key = rs.getInt("user_id");
                 Role role = Role.valueOf(rs.getString("role"));
 
-                roles.computeIfAbsent(key, k -> new HashSet<>()).add(role);
+                roles.computeIfAbsent(key, k -> EnumSet.noneOf(Role.class)).add(role);
             }
             return null;
         });
-
-        return jdbcTemplate.query("SELECT * FROM users ORDER BY name, email", ROW_MAPPER)
-                .stream()
-                .map(user -> {
-                    user.setRoles(roles.get(user.getId()));
-                    return user;
-                }).collect(Collectors.toList());
+        List<User> users = jdbcTemplate.query("SELECT * FROM users ORDER BY name, email", ROW_MAPPER);
+        users.forEach(user -> user.setRoles(roles.get(user.getId())));
+        return users;
     }
 
     private User addRoles(User user) {
         if (user == null) return null;
-        List<Role> roles = new ArrayList<>();
-        jdbcTemplate.query("SELECT * FROM user_role WHERE user_id = ?", rs -> {
-            do {
-                roles.add(Role.valueOf(rs.getString("role")));
-            } while (rs.next());
-        }, user.getId());
-        user.setRoles(roles);
+        user.setRoles(jdbcTemplate.queryForList("SELECT role FROM user_role WHERE user_id = ?", Role.class,
+                user.getId()));
         return user;
     }
 }

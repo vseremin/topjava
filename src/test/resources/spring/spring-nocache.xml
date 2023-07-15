@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
+        <property name="beanNameSeparator" value="ehCacheManager"/>
+    </bean>
+
+    <bean id="ehCacheManager" class="org.springframework.cache.support.NoOpCacheManager">
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
+        <property name="beanNameSeparator" value="entityManagerFactory"/>
+    </bean>
+
+    <beans profile="datajpa, jpa">
+        <bean class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
+            <property name="properties"
+                      value="entityManagerFactory.jpaPropertyMap['hibernate.cache.use_second_level_cache'] = false"/>
+        </bean>
+    </beans>
+</beans>

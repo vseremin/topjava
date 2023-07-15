@@ -6,9 +6,6 @@
 
 <html>
 <jsp:include page="fragments/headTag.jsp"/>
-<head>
-    <title><spring:message code="meal.title"/></title>
-</head>
 <body>
 <jsp:include page="fragments/bodyHeader.jsp"/>
 <section>
@@ -21,8 +18,7 @@
         <dl>
             <dt><spring:message code="meal.dateTime"/></dt>
             <dd><input type="datetime-local"
-                       value="${!meal.isNew() ? meal.dateTime : f:formatDateTime(LocalDateTime.now())}" name="dateTime"
-                       required></dd>
+                       value="${meal.dateTime}" name="dateTime" required></dd>
         </dl>
         <dl>
             <dt><spring:message code="meal.description"/>:</dt>

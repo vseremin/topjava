@@ -2,7 +2,6 @@ package ru.javawebinar.topjava.web.meal;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
@@ -21,7 +20,6 @@ public abstract class AbstractMealController {
 
     protected final Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
-    @Autowired
     protected MealService service;
 
     public AbstractMealController(MealService service) {
@@ -54,11 +52,10 @@ public abstract class AbstractMealController {
         return service.get(id, userId);
     }
 
-    public <T> T delete(int id) {
+    public void delete(int id) {
         int userId = SecurityUtil.authUserId();
         log.info("delete meal {} for user {}", id, userId);
         service.delete(id, userId);
-        return null;
     }
 
     /**

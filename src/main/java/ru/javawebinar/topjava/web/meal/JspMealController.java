@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 
 @Controller
 @RequestMapping(value = "/meals")
@@ -32,20 +33,19 @@ public class JspMealController extends AbstractMealController {
 
     @GetMapping("/update/{id}")
     public String get(@PathVariable("id") int id, Model model) {
-        model.addAttribute("id", id);
         model.addAttribute("meal", super.get(id));
         return "mealForm";
     }
 
     @GetMapping("/delete/{id}")
-    public String delete(@PathVariable("id") int id) {
-        super.delete(id);
+    public String delete(@PathVariable("id") String id) {
+        super.delete(Integer.parseInt(id));
         return "redirect:/meals";
     }
 
     @GetMapping("/create")
     public String create(Model model) {
-        model.addAttribute("meal", new Meal());
+        model.addAttribute("meal", new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 0));
         return "mealForm";
     }
 
@@ -60,7 +60,7 @@ public class JspMealController extends AbstractMealController {
         } else {
             super.create(meal);
         }
-        return "redirect:/meals";
+        return "redirect:meals";
     }
 
     @GetMapping("/filter")
