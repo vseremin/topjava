@@ -1,7 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
-<%@ page import="java.time.LocalDateTime" %>
 <%@ taglib prefix="f" uri="http://topjava.javawebinar.ru/functions" %>
 
 <html>
