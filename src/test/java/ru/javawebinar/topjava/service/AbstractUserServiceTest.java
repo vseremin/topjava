@@ -7,7 +7,6 @@ import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.DataAccessException;
-import ru.javawebinar.topjava.Profiles;
 import ru.javawebinar.topjava.UserTestData;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
@@ -25,26 +24,12 @@ import static ru.javawebinar.topjava.UserTestData.*;
 public abstract class AbstractUserServiceTest extends AbstractServiceTest {
 
     @Autowired
-    private Environment env;
-
-    @Autowired
     protected UserService service;
-
-    @Autowired
-    private CacheManager cacheManager;
 
     //   https://stackoverflow.com/a/64861410
     @Autowired
     @Lazy
     protected JpaUtil jpaUtil;
-
-    @Before
-    public void setup() {
-        cacheManager.getCache("users").clear();
-        if (!List.of(env.getActiveProfiles()).contains(Profiles.JDBC)) {
-            jpaUtil.clear2ndLevelHibernateCache();
-        }
-    }
 
     @Test
     public void create() {
