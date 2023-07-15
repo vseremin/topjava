@@ -1,7 +1,5 @@
 package ru.javawebinar.topjava.web.meal;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -11,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
+import ru.javawebinar.topjava.util.DateTimeUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
@@ -19,8 +18,7 @@ import java.time.LocalTime;
 
 @Controller
 @RequestMapping(value = "/meals")
-public class JspMealController extends MealRestController {
-    private static final Logger log = LoggerFactory.getLogger(JspMealController.class);
+public class JspMealController extends AbstractMealController {
 
     public JspMealController(MealService service) {
         super(service);
@@ -29,18 +27,18 @@ public class JspMealController extends MealRestController {
     @GetMapping
     public String getAll(Model model) {
         model.addAttribute("meals", super.getAll());
-        return "/meals";
+        return "meals";
     }
 
     @GetMapping("/update/{id}")
     public String get(@PathVariable("id") int id, Model model) {
         model.addAttribute("id", id);
         model.addAttribute("meal", super.get(id));
-        return "/mealForm";
+        return "mealForm";
     }
 
     @GetMapping("/delete/{id}")
-    public String delete(@PathVariable("id") int id, HttpServletRequest request) {
+    public String delete(@PathVariable("id") int id) {
         super.delete(id);
         return "redirect:/meals";
     }
@@ -48,15 +46,14 @@ public class JspMealController extends MealRestController {
     @GetMapping("/create")
     public String create(Model model) {
         model.addAttribute("meal", new Meal());
-        return "/mealForm";
+        return "mealForm";
     }
 
-    @PostMapping({"/update/meals", "/meals"})
-    public String edit(HttpServletRequest request) {
-        Meal meal = new Meal();
-        meal.setDescription(request.getParameter("description"));
-        meal.setCalories(Integer.parseInt(request.getParameter("calories")));
-        meal.setDateTime(LocalDateTime.parse(request.getParameter("dateTime")));
+    @PostMapping
+    public String save(HttpServletRequest request) {
+        Meal meal = new Meal(LocalDateTime.parse(request.getParameter("dateTime")),
+                request.getParameter("description"), Integer.parseInt(request.getParameter("calories")));
+
         String id = request.getParameter("id");
         if (StringUtils.hasText(id)) {
             super.update(meal, Integer.parseInt(id));
@@ -68,16 +65,12 @@ public class JspMealController extends MealRestController {
 
     @GetMapping("/filter")
     public String filter(Model model, HttpServletRequest request) {
-        String paramStartDate = request.getParameter("startDate");
-        LocalDate startDate = StringUtils.hasText(paramStartDate) ? LocalDate.parse(paramStartDate) : null;
-        String paramEndDate = request.getParameter("endDate");
-        LocalDate endDate = StringUtils.hasText(paramEndDate) ? LocalDate.parse(paramEndDate) : null;
-        String paramStartTime = request.getParameter("startTime");
-        LocalTime startTime = StringUtils.hasText(paramStartTime) ? LocalTime.parse(paramStartTime) : null;
-        String paramEndTime = request.getParameter("endTime");
-        LocalTime endTime = StringUtils.hasText(paramEndTime) ? LocalTime.parse(paramEndTime) : null;
+        LocalDate startDate = DateTimeUtil.parseLocalDate(request.getParameter("startDate"));
+        LocalDate endDate = DateTimeUtil.parseLocalDate(request.getParameter("endDate"));
+        LocalTime startTime = DateTimeUtil.parseLocalTime(request.getParameter("startTime"));
+        LocalTime endTime = DateTimeUtil.parseLocalTime(request.getParameter("endTime"));
         log.info("filtered");
         model.addAttribute("meals", super.getBetween(startDate, startTime, endDate, endTime));
-        return "/meals";
+        return "meals";
     }
 }

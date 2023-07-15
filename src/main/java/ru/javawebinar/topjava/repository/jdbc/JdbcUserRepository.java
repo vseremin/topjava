@@ -14,10 +14,8 @@ import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 @Transactional(readOnly = true)
@@ -44,7 +42,7 @@ public class JdbcUserRepository implements UserRepository {
     @Override
     @Transactional
     public User save(User user) {
-        Validator.validate(user);
+        ValidatorUtil.validate(user);
 
         BeanPropertySqlParameterSource parameterSource = new BeanPropertySqlParameterSource(user);
 
@@ -60,13 +58,12 @@ public class JdbcUserRepository implements UserRepository {
             }
             namedParameterJdbcTemplate.update("DELETE FROM user_role WHERE user_id =:id", parameterSource);
         }
-        if (!user.getRoles().isEmpty()) {
-            List<Object[]> args = new ArrayList<>();
-            for (Role role : user.getRoles()) {
-                args.add(new Object[]{user.getId(), role.name()});
-            }
-            jdbcTemplate.batchUpdate("INSERT INTO user_role (user_id, role) VALUES (?, ?)", args);
-        }
+
+        List<Object[]> args = user.getRoles().stream()
+                .map(role -> new Object[]{user.getId(), role.name()}).collect(Collectors.toList());
+
+        jdbcTemplate.batchUpdate("INSERT INTO user_role (user_id, role) VALUES (?, ?)", args);
+
         return user;
     }
 
@@ -90,24 +87,23 @@ public class JdbcUserRepository implements UserRepository {
 
     @Override
     public List<User> getAll() {
-        Map<Integer, List<Role>> roles = new HashMap<>();
+        Map<Integer, Set<Role>> roles = new HashMap<>();
         jdbcTemplate.query("SELECT * FROM user_role", rs -> {
             while (rs.next()) {
                 Integer key = rs.getInt("user_id");
                 Role role = Role.valueOf(rs.getString("role"));
 
-                roles.computeIfAbsent(key, k -> new ArrayList<>());
-                if (!roles.get(key).contains(role)) {
-                    roles.get(key).add(role);
-                }
+                roles.computeIfAbsent(key, k -> new HashSet<>()).add(role);
             }
             return null;
         });
-        List<User> users = jdbcTemplate.query("SELECT * FROM users ORDER BY name, email", ROW_MAPPER);
-        for (User user : users) {
-            user.setRoles(roles.get(user.getId()));
-        }
-        return users;
+
+        return jdbcTemplate.query("SELECT * FROM users ORDER BY name, email", ROW_MAPPER)
+                .stream()
+                .map(user -> {
+                    user.setRoles(roles.get(user.getId()));
+                    return user;
+                }).collect(Collectors.toList());
     }
 
     private User addRoles(User user) {
