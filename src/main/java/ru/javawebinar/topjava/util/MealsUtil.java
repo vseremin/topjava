@@ -25,6 +25,12 @@ public class MealsUtil {
         return filterByPredicate(meals, caloriesPerDay, meal -> Util.isBetweenHalfOpen(meal.getTime(), startTime, endTime));
     }
 
+    public static List<Meal> convertToMeals(Collection<MealTo> meals) {
+        return meals.stream()
+                .map(m -> new Meal(m.getId(), m.getDateTime(), m.getDescription(), m.getCalories()))
+                .toList();
+    }
+
     private static List<MealTo> filterByPredicate(Collection<Meal> meals, int caloriesPerDay, Predicate<Meal> filter) {
         Map<LocalDate, Integer> caloriesSumByDate = meals.stream()
                 .collect(
