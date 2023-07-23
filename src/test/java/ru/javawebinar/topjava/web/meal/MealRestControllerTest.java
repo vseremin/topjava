@@ -22,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.javawebinar.topjava.MealTestData.*;
 import static ru.javawebinar.topjava.UserTestData.USER_ID;
+import static ru.javawebinar.topjava.UserTestData.user;
 
 class MealRestControllerTest extends AbstractControllerTest {
 
@@ -52,7 +53,7 @@ class MealRestControllerTest extends AbstractControllerTest {
         perform(MockMvcRequestBuilders.get(MEAL_REST_URL))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(MEAL_TO_MATCHER.contentJson(MealsUtil.getTos(meals, MealsUtil.DEFAULT_CALORIES_PER_DAY)));
+                .andExpect(MEAL_TO_MATCHER.contentJson(MealsUtil.getTos(meals, user.getCaloriesPerDay())));
     }
 
     @Test
@@ -62,19 +63,21 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.writeValue(updated)))
                 .andExpect(status().isNoContent());
-
         MEAL_MATCHER.assertMatch(mealService.get(MEAL1_ID, USER_ID), updated);
     }
 
     @Test
     public void getBetween() throws Exception {
-        perform(MockMvcRequestBuilders.get(MEAL_REST_URL +
-                "/filter?startDate=2020-01-30&endDate=2020-01-30&startTime=00:00&endTime=13:59"))
+        perform(MockMvcRequestBuilders.get(MEAL_REST_URL + "/filter?")
+                .param("startDate", "2020-01-31")
+                .param("endDate", "2020-01-31")
+                .param("startTime", "00:00")
+                .param("endTime", "13:59"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(MEAL_TO_MATCHER.contentJson(
-                        MealsUtil.getFilteredTos(List.of(meal2, meal1), MealsUtil.DEFAULT_CALORIES_PER_DAY,
-                                LocalTime.parse("00:00"), LocalTime.parse("23:59"))));
+                        MealsUtil.getFilteredTos(List.of(meal7, meal6, meal5, meal4), MealsUtil.DEFAULT_CALORIES_PER_DAY,
+                                LocalTime.of(0, 0), LocalTime.of(13, 59))));
     }
 
     @Test
