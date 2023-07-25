@@ -1,6 +1,6 @@
 # Get all meals:
 curl http://localhost:8080/topjava/rest/meals
-# Get meal by id:
+# Get meal:
 curl http://localhost:8080/topjava/rest/meals/100007
 # Delete meal:
 curl --request DELETE http://localhost:8080/topjava/rest/meals/100008
