@@ -13,9 +13,6 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 import ru.javawebinar.topjava.web.AbstractControllerTest;
 import ru.javawebinar.topjava.web.json.JsonUtil;
 
-import java.time.LocalTime;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -75,9 +72,15 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .param("endTime", "13:59"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(MEAL_TO_MATCHER.contentJson(
-                        MealsUtil.getFilteredTos(List.of(meal7, meal6, meal5, meal4), MealsUtil.DEFAULT_CALORIES_PER_DAY,
-                                LocalTime.of(0, 0), LocalTime.of(13, 59))));
+                .andExpect(MEAL_TO_MATCHER.contentJson(mealTo6, mealTo5, mealTo4));
+    }
+
+    @Test
+    public void getBetweenWithNull() throws Exception {
+        perform(MockMvcRequestBuilders.get(MEAL_REST_URL + "/filter?startDate=&endTime="))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(MEAL_TO_MATCHER.contentJson(mealTo7, mealTo6, mealTo5, mealTo4, mealTo3, mealTo2, mealTo1));
     }
 
     @Test
