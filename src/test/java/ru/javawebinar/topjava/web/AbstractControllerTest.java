@@ -42,7 +42,7 @@ public abstract class AbstractControllerTest {
     private WebApplicationContext webApplicationContext;
 
     @Autowired
-    protected Environment env;
+    private Environment env;
 
     @PostConstruct
     private void postConstruct() {
