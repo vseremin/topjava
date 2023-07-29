@@ -1,11 +1,9 @@
 const userAjaxUrl = "admin/users/";
 
-// https://stackoverflow.com/a/5064235/548473
 const ctx = {
     ajaxUrl: userAjaxUrl
 };
 
-// $(document).ready(function () {
 $(function () {
     makeEditable(
         $("#datatable").DataTable({
@@ -45,3 +43,13 @@ $(function () {
         })
     );
 });
+
+function deleteRow(id) {
+    $.ajax({
+        url: ctx.ajaxUrl + id,
+        type: "DELETE"
+    }).done(function () {
+        updateTable();
+        successNoty("Deleted");
+    });
+}
