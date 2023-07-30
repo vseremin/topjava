@@ -22,23 +22,28 @@ function add() {
     $("#editRow").modal();
 }
 
-function updateTable() {
-    $.get(ctx.ajaxUrl, function (data) {
-        ctx.datatableApi.clear().rows.add(data).draw();
+function updateTable(url) {
+    $.get(url, function (data) {
+        drawTable(data);
     });
 }
 
-function save() {
-    $.ajax({
-        type: "POST",
-        url: ctx.ajaxUrl,
-        data: form.serialize()
-    }).done(function () {
+function save(func, url) {
+    func.done(function () {
         $("#editRow").modal("hide");
-        updateTable();
-        successNoty("Saved");
+        updateTable(url);
+        successNoty("Saved ");
     });
 }
+
+function deleteWithFunc(func, url) {
+    func.done(function () {
+        updateTable(url);
+        successNoty("Deleted");
+    });
+}
+
+
 
 let failedNote;
 
@@ -67,4 +72,8 @@ function failNoty(jqXHR) {
         layout: "bottomRight"
     });
     failedNote.show()
+}
+
+function drawTable(data) {
+    ctx.datatableApi.clear().rows.add(data).draw();
 }

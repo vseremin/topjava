@@ -8,7 +8,7 @@ const ctx = {
             url: ctx.mealsUrl + "filter",
             data: $("#filter").serialize()
         }).done(function (data) {
-            ctx.datatableApi.clear().rows.add(data).draw();
+            drawTable(data);
         });
     }
 };
@@ -48,47 +48,24 @@ $(function () {
 });
 
 function deleteRow(id) {
-    $.ajax({
+    var func = $.ajax({
         url: ctx.mealsUrl + id,
         type: "DELETE"
-    }).done(function () {
-        updateTableMeals();
-        successNoty("Deleted");
     });
-}
-
-function updateTableMeals(data) {
-    $.get(ctx.mealsUrl, function (data) {
-        ctx.datatableApi.clear().rows.add(data).draw();
-    });
-}
-
-function add() {
-    form.find(":input").val("");
-    $("#editRow").modal();
-}
-
-function updateTable() {
-    $.get(ctx.mealsUrl, function (data) {
-        ctx.datatableApi.clear().rows.add(data).draw();
-    });
+    deleteWithFunc(func, ctx.mealsUrl);
 }
 
 function saveMeals() {
-    var formData = {
-        dateTime: $("#dateTime").val(),
-        description: $("#description").val(),
-        calories: $("#calories").val()
-    };
-
-    $.ajax({
-        type: "POST",
-        url: ctx.mealsUrl,
-        data: JSON.stringify(formData),
-        contentType: "application/json",
-    }).done(function () {
-        $("#editRow").modal("hide");
-        updateTable();
-        successNoty("Saved");
-    });
+    var func = $.ajax({
+            type: "POST",
+            url: ctx.mealsUrl,
+            data: JSON.stringify({
+                dateTime: $("#dateTime").val(),
+                description: $("#description").val(),
+                calories: $("#calories").val()
+            }),
+            contentType: "application/json",
+        })
+    save(func, ctx.mealsUrl);
 }
+
