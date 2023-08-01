@@ -27,7 +27,9 @@ public class AdminUIController extends AbstractUserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void save(@RequestBody User user) {
-        super.create(new User(null, user.getName(), user.getEmail(), user.getPassword(), Role.USER));
+    public void create(@RequestParam String name,
+                       @RequestParam String email,
+                       @RequestParam String password) {
+        super.create(new User(null, name, email, password, Role.USER));
     }
 }

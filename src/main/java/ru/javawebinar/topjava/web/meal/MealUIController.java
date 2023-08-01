@@ -8,6 +8,7 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.to.MealTo;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -38,9 +39,11 @@ public class MealUIController extends AbstractMealController {
         return super.getBetween(startDate, startTime, endDate, endTime);
     }
 
-    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void save(@RequestBody Meal meal) {
-        super.create(new Meal(null, meal.getDateTime(), meal.getDescription(), meal.getCalories()));
+    public void create(@RequestParam String dateTime,
+                       @RequestParam String description,
+                       @RequestParam String calories) {
+        super.create(new Meal(LocalDateTime.parse(dateTime), description, Integer.parseInt(calories)));
     }
 }

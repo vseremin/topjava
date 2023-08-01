@@ -1,11 +1,11 @@
 const mealsAjaxUrl = "profile/meals/";
 
 const ctx = {
-    mealsUrl: mealsAjaxUrl,
+    ajaxUrl: mealsAjaxUrl,
     updateTable: function () {
         $.ajax({
             type: "GET",
-            url: ctx.mealsUrl + "filter",
+            url: ctx.ajaxUrl + "filter",
             data: $("#filter").serialize()
         }).done(function (data) {
             drawTable(data);
@@ -46,26 +46,4 @@ $(function () {
         })
     );
 });
-
-function deleteRow(id) {
-    var func = $.ajax({
-        url: ctx.mealsUrl + id,
-        type: "DELETE"
-    });
-    deleteWithFunc(func, ctx.mealsUrl);
-}
-
-function saveMeals() {
-    var func = $.ajax({
-            type: "POST",
-            url: ctx.mealsUrl,
-            data: JSON.stringify({
-                dateTime: $("#dateTime").val(),
-                description: $("#description").val(),
-                calories: $("#calories").val()
-            }),
-            contentType: "application/json",
-        })
-    save(func, ctx.mealsUrl);
-}
 

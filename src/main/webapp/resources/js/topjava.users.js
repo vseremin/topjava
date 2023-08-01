@@ -43,25 +43,3 @@ $(function () {
         })
     );
 });
-
-function deleteRow(id) {
-    var func = $.ajax({
-        url: ctx.ajaxUrl + id,
-        type: "DELETE"
-    });
-    deleteWithFunc(func, userAjaxUrl);
-}
-
-function saveUsers() {
-     var func = $.ajax({
-         type: "POST",
-         url: ctx.ajaxUrl,
-         data: JSON.stringify({
-             name: $("#name").val(),
-             email: $("#email").val(),
-             password: $("#password").val()
-         }),
-         contentType: "application/json",
-         })
-    save(func, ctx.ajaxUrl);
-}

@@ -22,28 +22,33 @@ function add() {
     $("#editRow").modal();
 }
 
-function updateTable(url) {
-    $.get(url, function (data) {
-        drawTable(data);
-    });
-}
-
-function save(func, url) {
-    func.done(function () {
-        $("#editRow").modal("hide");
-        updateTable(url);
-        successNoty("Saved ");
-    });
-}
-
-function deleteWithFunc(func, url) {
-    func.done(function () {
-        updateTable(url);
+function deleteRow(id) {
+    $.ajax({
+        url: ctx.ajaxUrl + id,
+        type: "DELETE"
+    }).done(function () {
+        updateTable();
         successNoty("Deleted");
     });
 }
 
+function updateTable() {
+    $.get(ctx.ajaxUrl, function (data) {
+        ctx.datatableApi.clear().rows.add(data).draw();
+    });
+}
 
+function save() {
+    $.ajax({
+        type: "POST",
+        url: ctx.ajaxUrl,
+        data: form.serialize()
+    }).done(function () {
+        $("#editRow").modal("hide");
+        updateTable();
+        successNoty("Saved");
+    });
+}
 
 let failedNote;
 
