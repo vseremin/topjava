@@ -1,5 +1,6 @@
 package ru.javawebinar.topjava.web.meal;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
@@ -41,9 +42,9 @@ public class MealUIController extends AbstractMealController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void create(@RequestParam String dateTime,
+    public void create(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTime,
                        @RequestParam String description,
-                       @RequestParam String calories) {
-        super.create(new Meal(LocalDateTime.parse(dateTime), description, Integer.parseInt(calories)));
+                       @RequestParam Integer calories) {
+        super.create(new Meal(dateTime, description, calories));
     }
 }

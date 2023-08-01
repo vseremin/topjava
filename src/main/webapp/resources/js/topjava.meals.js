@@ -49,5 +49,5 @@ $(function () {
 
 function clearFilter() {
     $("#filter")[0].reset();
-    updateTable(ctx.ajaxUrl);
+    updateTable();
 }
