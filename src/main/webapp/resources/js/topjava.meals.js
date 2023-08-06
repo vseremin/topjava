@@ -30,10 +30,10 @@ $(function () {
                 {
                     "data": "dateTime",
                     "render": function (dateTime, type, row) {
-                        if (type === "display") {
-                            return dateTime.substring(0, 10) + ' '+ dateTime.substring(11, 16);
-                        }
-                        return dateTime;
+                    if (type === "display") {
+                        return dateTime.substring(0, 10) + ' '+ dateTime.substring(11, 16);
+                    }
+                      return dateTime;
                     }
                 },
                 {
@@ -60,8 +60,25 @@ $(function () {
                 ]
             ],
             "createdRow": function (row, data, dataIndex) {
-                    $(row).attr("data-meal-excess", data.excess);
+                $(row).attr("data-meal-excess", data.excess);
             }
         })
     );
+});
+
+$('#startDate').datetimepicker({
+    timepicker: false,
+    format: 'Y-m-d'
+});
+$('#endDate').datetimepicker({
+    timepicker: false,
+    format: 'Y-m-d'
+});
+$('#startTime').datetimepicker({
+    datepicker: false,
+    format: 'H:i'
+});
+$('#endTime').datetimepicker({
+    datepicker: false,
+    format: 'H:i'
 });
