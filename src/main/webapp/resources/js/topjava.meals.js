@@ -12,6 +12,22 @@ const ctx = {
     }
 }
 
+$.ajaxSetup({
+    converters: {
+        "text json": function(data) {
+            var json = JSON.parse(data);
+            if (typeof json === 'object') {
+                $(json).each(function () {
+                    if (this.hasOwnProperty('dateTime')) {
+                        this.dateTime = this.dateTime.substring(0, 16).replace('T', ' ');
+                    }
+                });
+            }
+            return json;
+        }
+    }
+});
+
 function clearFilter() {
     $("#filter")[0].reset();
     $.get(mealAjaxUrl, updateTableByData);
@@ -28,13 +44,7 @@ $(function () {
             "info": true,
             "columns": [
                 {
-                    "data": "dateTime",
-                    "render": function (dateTime, type, row) {
-                        if (type === "display") {
-                            return dateTime.substring(0, 10) + ' ' + dateTime.substring(11, 16);
-                        }
-                        return dateTime;
-                    }
+                    "data": "dateTime"
                 },
                 {
                     "data": "description"
