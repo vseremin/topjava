@@ -94,7 +94,7 @@ class MealRestControllerTest extends AbstractControllerTest {
 
     @Test
     @Transactional(propagation = Propagation.NEVER)
-    void updateNotValidDate() throws Exception {
+    void updateWithDuplicateDate() throws Exception {
         Meal test = new Meal(MEAL1_ID, meal2.getDateTime(), "Test", 1000);
         perform(MockMvcRequestBuilders.put(REST_URL + MEAL1_ID).contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(user))

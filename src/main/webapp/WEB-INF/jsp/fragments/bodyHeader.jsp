@@ -1,4 +1,3 @@
-<%@ page import="org.springframework.web.util.UrlPathHelper" %>
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
@@ -36,8 +35,8 @@
                 <span class="caret"></span>
             </li>
             <div class="dropdown-menu">
-                <a class="dropdown-item" href="<%= new UrlPathHelper().getOriginatingRequestUri(request) %>?lang=en">English</a>
-                <a class="dropdown-item" href="<%= new UrlPathHelper().getOriginatingRequestUri(request) %>?lang=ru">Русский</a>
+                <a class="dropdown-item" href="${requestScope['javax.servlet.forward.request_uri']}?lang=en">English</a>
+                <a class="dropdown-item" href="${requestScope['javax.servlet.forward.request_uri']}?lang=ru">Русский</a>
             </div>
         </div>
 </nav>

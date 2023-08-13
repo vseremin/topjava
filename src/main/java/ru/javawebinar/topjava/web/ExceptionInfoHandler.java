@@ -22,6 +22,7 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import static ru.javawebinar.topjava.util.exception.ErrorType.*;
@@ -70,6 +71,15 @@ public class ExceptionInfoHandler {
         return logAndGetErrorInfo(req, e, false, VALIDATION_ERROR);
     }
 
+    @ResponseStatus(value = HttpStatus.UNPROCESSABLE_ENTITY)
+    @ExceptionHandler(BindException.class)
+    public ErrorInfo validate(HttpServletRequest req, BindException be) {
+        return logAndGetErrorInfo(req, be, false, VALIDATION_ERROR,
+                be.getBindingResult().getFieldErrors().stream()
+                        .map(fieldError -> String.format("[%s] %s", fieldError.getField(), fieldError.getDefaultMessage()))
+                        .toArray(String[]::new));
+    }
+
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public ErrorInfo internalError(HttpServletRequest req, Exception e) {
@@ -85,15 +95,7 @@ public class ExceptionInfoHandler {
         } else {
             log.warn("{} at request  {}: {}", errorType, req.getRequestURL(), rootCause.toString());
         }
-        return new ErrorInfo(req.getRequestURL(), errorType, details.length == 0 ? rootCause.toString() : Arrays.toString(details));
-    }
-
-    @ResponseStatus(value = HttpStatus.UNPROCESSABLE_ENTITY)
-    @ExceptionHandler(BindException.class)
-    public ErrorInfo validate(HttpServletRequest req, BindException be) {
-        return logAndGetErrorInfo(req, be, false, VALIDATION_ERROR,
-                be.getBindingResult().getFieldErrors().stream()
-                        .map(fieldError -> String.format("[%s] %s", fieldError.getField(), fieldError.getDefaultMessage()))
-                        .toArray(String[]::new));
+        return new ErrorInfo(req.getRequestURL(), errorType, details.length == 0 ?
+                Collections.singletonList(rootCause.getMessage()) : Arrays.asList(details));
     }
 }
